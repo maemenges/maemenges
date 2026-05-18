@@ -1,0 +1,91 @@
+# ==============================
+# STIG: WN11-CC-000345
+# Title:
+# Windows 11 must be configured to prevent
+# Windows apps from being activated by voice
+# while the system is locked.
+#
+# Run as: Administrator
+# PowerShell: ISE or elevated PowerShell
+# ==============================
+
+
+# ==============================
+# REMEDIATION
+# ==============================
+
+# Create registry path if it does not exist
+New-Item `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
+    -Force
+
+
+# Configure STIG-compliant setting
+# Value 2 = Force Deny
+Set-ItemProperty `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
+    -Name "LetAppsActivateWithVoiceAboveLock" `
+    -Type DWord `
+    -Value 2
+
+
+# Apply policy refresh
+gpupdate /force
+
+
+# ==============================
+# VERIFICATION
+# ==============================
+
+Write-Host ""
+Write-Host "==== VERIFYING STIG CONFIGURATION ====" -ForegroundColor Cyan
+
+Get-ItemProperty `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
+    -Name "LetAppsActivateWithVoiceAboveLock"
+
+
+Write-Host ""
+Write-Host "==== REGISTRY QUERY ====" -ForegroundColor Cyan
+
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsActivateWithVoiceAboveLock
+
+
+# ==============================
+# EXPECTED COMPLIANT RESULT
+# ==============================
+
+<#
+Expected Output:
+
+LetAppsActivateWithVoiceAboveLock : 2
+
+and
+
+LetAppsActivateWithVoiceAboveLock    REG_DWORD    0x2
+
+0x2 = Force Deny (STIG Compliant)
+
+#>
+
+
+# ==============================
+# OPTIONAL AUDIT STATUS CHECK
+# ==============================
+
+$value = (Get-ItemProperty `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
+    -Name "LetAppsActivateWithVoiceAboveLock").LetAppsActivateWithVoiceAboveLock
+
+if ($value -eq 2)
+{
+    Write-Host ""
+    Write-Host "STIG WN11-CC-000345 COMPLIANT" -ForegroundColor Green
+}
+else
+{
+    Write-Host ""
+    Write-Host "STIG WN11-CC-000345 NOT COMPLIANT" -ForegroundColor Red
+}
+
+

@@ -7,6 +7,7 @@ I'm passionate about cybersecurity and love tackling complex challenges through 
 
 - **[Vulnerability Management Program Implementation](https://github.com/maemenges/Vulnerability-management-program/blob/main/README.md)**
 - **[Programmatic Vulnerability Remediations (PowerShell, BASH, & Shell Commands)](https://github.com/maemenges/Programmatic-Vulnerability-Remediations-PowerShell-BASH-Shell-Commands-/blob/main/README.md)**
+- **[Stig Implementation]
 
 ## 🚨 Threat Hunting and Security Operations
 

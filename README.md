@@ -12,7 +12,7 @@ I'm passionate about cybersecurity and love tackling complex challenges through 
 ## 🚨 Threat Hunting and Security Operations
 
 - **[Threat Hunting Scenario](https://github.com/maemenges/maemenges/tree/main/Threat%20Hunt%20Scenario)**
-   - **[Business Email Compromise(BEC)](https://github.com/maemenges/maemenges/blob/main/Threat%20Hunt%20Scenario/Business%20Email%20compromise%20(BEC))**
+   - **[Business Email Compromise(BEC)](https://github.com/maemenges/maemenges/blob/main/Threat%20Hunt%20Scenario/Business%20Email%20compromise%20(BEC).md)**
 
 <hr/>
 

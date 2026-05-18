@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Configures the policy: Disable Internet Explorer 11 as a standalone browser
-
+    
 .NOTES
     Author          : Mae Menges
     LinkedIn        : linkedin.com/in/mae-menges

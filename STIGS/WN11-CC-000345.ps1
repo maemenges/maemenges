@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-    This PowerShell script ensures that the maximum size of the Windows Application event log is at least 32768 KB (32 MB).
+    This script disables Basic authentication for WinRM by configuring
+the registry and WinRM service settings.
 
 .NOTES
     Author          : Mae Menges
@@ -29,23 +30,35 @@
 # REMEDIATION
 # ==============================
 
-# Create registry path if it does not exist
+Write-Host ""
+Write-Host "Applying STIG remediation..." -ForegroundColor Cyan
+
+
+# Create registry path if missing
 New-Item `
-    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" `
     -Force
 
 
-# Configure STIG-compliant setting
-# Value 2 = Force Deny
+# Disable Basic Authentication
+# 0 = Disabled
 Set-ItemProperty `
-    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
-    -Name "LetAppsActivateWithVoiceAboveLock" `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" `
+    -Name "AllowBasic" `
     -Type DWord `
-    -Value 2
+    -Value 0
 
 
-# Apply policy refresh
+# Configure WinRM service directly
+winrm set winrm/config/service/auth '@{Basic="false"}'
+
+
+# Refresh Group Policy
 gpupdate /force
+
+
+# Restart WinRM service
+Restart-Service WinRM
 
 
 # ==============================
@@ -53,17 +66,23 @@ gpupdate /force
 # ==============================
 
 Write-Host ""
-Write-Host "==== VERIFYING STIG CONFIGURATION ====" -ForegroundColor Cyan
+Write-Host "==== VERIFYING REGISTRY CONFIGURATION ====" -ForegroundColor Cyan
 
 Get-ItemProperty `
-    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" `
-    -Name "LetAppsActivateWithVoiceAboveLock"
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" `
+    -Name "AllowBasic"
+
+
+Write-Host ""
+Write-Host "==== VERIFYING WINRM CONFIGURATION ====" -ForegroundColor Cyan
+
+winrm get winrm/config/service/auth
 
 
 Write-Host ""
 Write-Host "==== REGISTRY QUERY ====" -ForegroundColor Cyan
 
-reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsActivateWithVoiceAboveLock
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" /v AllowBasic
 
 
 # ==============================
@@ -71,14 +90,39 @@ reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsActiva
 # ==============================
 
 <#
-Expected Output:
+Expected Registry Output:
 
-LetAppsActivateWithVoiceAboveLock : 2
+AllowBasic : 0
 
 and
 
-LetAppsActivateWithVoiceAboveLock    REG_DWORD    0x2
+AllowBasic    REG_DWORD    0x0
 
-0x2 = Force Deny (STIG Compliant)
 
+Expected WinRM Output:
+
+Basic = false
+
+
+0 / false = STIG Compliant
 #>
+
+
+# ==============================
+# OPTIONAL COMPLIANCE CHECK
+# ==============================
+
+$value = (Get-ItemProperty `
+    -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service" `
+    -Name "AllowBasic").AllowBasic
+
+if ($value -eq 0)
+{
+    Write-Host ""
+    Write-Host "STIG COMPLIANT: Basic authentication is disabled." -ForegroundColor Green
+}
+else
+{
+    Write-Host ""
+    Write-Host "STIG NOT COMPLIANT: Basic authentication is enabled." -ForegroundColor Red
+}
